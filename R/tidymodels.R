@@ -1,5 +1,9 @@
 
-.generate_grid_params <- function(x, n_param = 10, n_col = ncol(x)) {
+#' Generate a parameter grid
+#'
+#' Generate a parameter grid given data.
+#' @export
+generate_grid_params <- function(x, n_param = 10, n_col = ncol(x)) {
 
   x <- tibble::as_tibble(x)
   res <-
@@ -21,6 +25,7 @@
   res
 }
 
+# TODO:
 .create_group_folds <- function(data, col_grp, v = 1, ...) {
   split_objs <- rsample::group_vfold_splits(data = data, group = col_grp)
 }

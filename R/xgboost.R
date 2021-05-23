@@ -60,7 +60,6 @@
           min_child_weight = params$min_n
         )
 
-      # browser()
       fit_cv <-
         xgboost::xgb.cv(
           data = x_dmat,
@@ -81,29 +80,23 @@
     res
   }
 
-.inverse_log <- function(x) {
+#' Inverse log
+#'
+#' Perform an inverse log.
+#' @export
+inverse_log <- function(x) {
   exp(x) - 1
 }
 
 #' @noRd
 .augment_preds <-
   function(v,
-           data,
-           cols_id = 'idx',
-           cols_extra = NULL,
-           col_y,
+           x,
            f_trans = NULL) {
-    col_y_sym <- col_y %>% sym()
     preds <-
-      v %>%
-      dplyr::tibble(.pred = .) %>%
       dplyr::bind_cols(
-        data %>%
-          dplyr::select(
-            dplyr::all_of(cols_id),
-            dplyr::one_of(cols_extra),
-            dplyr::all_of(col_y)
-          )
+        tibble::tibble(.pred = v),
+        x
       )
 
     if (!is.null(f_trans) & is.function(f_trans)) {
@@ -115,7 +108,7 @@
   }
 
 #' @noRd
-.shap_xgb <- function(fit, x_mat, preds, col_y, cols_id) {
+.shap_xgb <- function(fit, x_mat, preds, col_y, col_id) {
 
   suppressWarnings(
     feature_values_init <-
@@ -145,7 +138,7 @@
     shap_init %>%
     dplyr::bind_cols(
       preds %>%
-        dplyr::select(!!!syms(cols_id), .pred, .actual = !!sym(col_y))
+        dplyr::select(!!sym(col_id), .pred, .actual = !!sym(col_y))
     )
   shap
 }
