@@ -1,0 +1,25 @@
+Type: Package
+Package: xgbh
+Title: xgboost helpers
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Tony",
+           family = "ElHabr",
+           role = c("aut", "cre"),
+           email = "anthonyelhabr@gmail.com")
+Description: An R package for helping with xgboost
+License: MIT + file LICENSE
+Imports: 
+    assertthat,
+    cli,
+    dials,
+    dplyr,
+    glue,
+    magrittr,
+    rlang (>= 0.1.2),
+    xgboost
+Suggests: 
+    roxygen2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
