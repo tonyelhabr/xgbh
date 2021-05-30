@@ -2,6 +2,7 @@
 #' Wrapper function for importing and exporting
 #'
 #' Wrapper that imports and exports result of a function to a file on disk.
+#' @param do Whether to actually do anything.
 #' @param f function to execute
 #' @param ... Extra arguments to pass to `f`
 #' @param dir Directory to use to generate `path` if `path` is not explicitly provided.
@@ -16,6 +17,7 @@
 #' @export
 do_get <-
   function(...,
+           do = TRUE,
            f = NULL,
            file = tempfile(),
            ext = 'rds',
@@ -26,6 +28,9 @@ do_get <-
            append = FALSE,
            export = TRUE,
            overwrite = FALSE) {
+    if(!do) {
+      return(NULL)
+    }
     path <- .generate_path(path = path, dir = dir, file = file, ext = ext)
     path_exists <- path %>% file.exists()
 

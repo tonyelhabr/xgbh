@@ -6,6 +6,7 @@
 \usage{
 do_get(
   ...,
+  do = TRUE,
   f = NULL,
   file = tempfile(),
   ext = "rds",
@@ -20,6 +21,8 @@ do_get(
 }
 \arguments{
 \item{...}{Extra arguments to pass to `f`}
+
+\item{do}{Whether to actually do anything.}
 
 \item{f}{function to execute}
 

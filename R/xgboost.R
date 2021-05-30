@@ -15,6 +15,9 @@
 .postprocess_xgb_cv_res <- function(res, fit_cv, eval_metrics) {
   # NOTE: This doesn't generalize when there are more than one eval metrics.
 
+  if(length(eval_metrics) > 1L) {
+    .display_warning('Only know how to deal with `length(eval_metrics) == 1L`. Only using first element.')
+  }
   .eval_metric <- eval_metrics[1]
   col_trn <- sprintf('train_%s_mean', .eval_metric)
   col_trn_res <- sprintf('%s_trn', .eval_metric)
@@ -42,7 +45,6 @@
            eval_metrics,
            ...) {
 
-    # browser()
     .get_metrics <- function(params, idx = 1) {
 
       .display_info('Row {cli::bg_black(idx)}')
@@ -60,6 +62,7 @@
           min_child_weight = params$min_n
         )
 
+
       fit_cv <-
         xgboost::xgb.cv(
           data = x_dmat,
@@ -67,6 +70,7 @@
           metrics = eval_metrics,
           ...
         )
+
       res <- .postprocess_xgb_cv_res(res, fit_cv, eval_metrics)
       res
     }
@@ -88,27 +92,24 @@ inverse_log <- function(x) {
   exp(x) - 1
 }
 
-#' @noRd
-.augment_preds <-
-  function(v,
-           x,
-           f_trans = NULL) {
-    preds <-
-      dplyr::bind_cols(
-        tibble::tibble(.pred = v),
-        x
-      )
-
-    if (!is.null(f_trans) & is.function(f_trans)) {
-      preds <-
-        preds %>%
-        dplyr::mutate(dplyr::across(.pred, f_trans))
-    }
-    preds
-  }
 
 #' @noRd
 .shap_xgb <- function(fit, x_mat, preds, col_y, col_id) {
+
+  is_multi_soft <- fit$params$objective %>% str_detect('^multi[:].*prob$')
+  is_binary_soft <- fit$params$objective == '^binary[:]logistic'
+  # if(is_multi_soft | is_binary_soft) {
+  #   preds_v <- fit %>% stats::predict(x_mat, ...)
+  #   n_class <- fit$params$num_class
+  #   preds <-
+  #     matrix(preds_v, ncol = n_class, byrow = TRUE) %>%
+  #     as.data.frame() %>%
+  #     as_tibble() %>%
+  #     set_names(sprintf('.prob_%d', 1:n_class))
+  # } else {
+  #   preds_v <- fit %>% stats::predict(x_mat, ...)
+  #   preds <- tibble::tibble(.pred = preds_v)
+  # }
 
   suppressWarnings(
     feature_values_init <-
@@ -133,13 +134,19 @@ inverse_log <- function(x) {
     dplyr::rename(baseline = BIAS)
   shap_init
 
-  # TODO: Don't hard-code `idx`.
+  has_y <- any(names(preds) == col_y)
+  rgx <- '^[.](pred|prob)'
+  preds_join <- if(has_y) {
+    preds %>%
+      dplyr::select(!!sym(col_id), matches(rgx), .actual = !!sym(col_y))
+  } else {
+    preds %>%
+      dplyr::select(!!sym(col_id), matches(rgx))
+  }
+
   shap <-
     shap_init %>%
-    dplyr::bind_cols(
-      preds %>%
-        dplyr::select(!!sym(col_id), .pred, .actual = !!sym(col_y))
-    )
+    dplyr::bind_cols(preds_join)
   shap
 }
 

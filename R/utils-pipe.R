@@ -9,3 +9,13 @@
 #' @importFrom magrittr %>%
 #' @usage lhs \%>\% rhs
 NULL
+
+#' Multiple assignment operator
+#'
+#' Multiple assignment operator
+#' @name %<-%
+#' @rdname assignment
+#' @keywords internal
+#' @export
+#' @importFrom zeallot %<-%
+NULL

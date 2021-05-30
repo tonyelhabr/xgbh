@@ -13,14 +13,27 @@ do_fit(
   col_id = NULL,
   overwrite = TRUE,
   export = TRUE,
+  minimal = FALSE,
+  f_import = readr::read_rds,
+  f_export = readr::write_rds,
   ...,
   drop = TRUE,
   dir = .get_dir_data(),
+  file = NULL,
+  ext = "rds",
   sep = "_",
   suffix = NULL,
   seed = .get_seed(),
-  .overwrite = list(tune = NULL, fit = NULL),
+  .do = list(tune = NULL, fit = NULL),
+  .f_import = list(tune = NULL, fit = if (minimal) {     xgboost::xgb.load } else {    
+    NULL }),
+  .f_export = list(tune = NULL, fit = if (minimal) {     xgboost::xgb.save } else {    
+    NULL }),
   .export = list(tune = NULL, fit = NULL),
+  .overwrite = list(tune = NULL, fit = NULL),
+  .dir = list(tune = NULL, fit = NULL),
+  .file = list(tune = "tune", fit = "fit"),
+  .ext = list(tune = NULL, fit = if (minimal) {     "model" } else {     NULL }),
   .path = list(tune = NULL, fit = NULL),
   print_every_n = 10,
   fold_ids = NULL,
@@ -35,6 +48,7 @@ do_fit(
   booster = "gbtree",
   objective = "reg:squarederror",
   eval_metrics = list("rmse"),
+  f_slice = dplyr::slice_min,
   early_stopping_rounds = 10
 )
 }

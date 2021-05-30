@@ -9,23 +9,38 @@ do_predict(
   fit = NULL,
   path_fit = NULL,
   x = NULL,
+  cols_x = NULL,
   y = NULL,
   col_y = NULL,
   id = NULL,
   col_id = NULL,
+  f_import = arrow::read_parquet,
+  f_export = arrow::write_parquet,
+  augment = TRUE,
+  do = TRUE,
   overwrite = TRUE,
   export = TRUE,
   ...,
   dir = .get_dir_data(),
+  file = NULL,
+  ext = "parquet",
   sep = "_",
   suffix = NULL,
-  .overwrite = list(preds = NULL, shap = NULL),
+  use_y = FALSE,
+  .do = list(preds = NULL, shap = NULL),
+  .f_import = list(preds = NULL, shap = NULL),
+  .f_export = list(preds = NULL, shap = NULL),
   .export = list(preds = NULL, shap = NULL),
+  .overwrite = list(preds = NULL, shap = NULL),
+  .dir = list(preds = NULL, shap = NULL),
+  .file = list(preds = "preds", shap = "shap"),
+  .ext = list(preds = NULL, shap = NULL),
   .path = list(preds = NULL, shap = NULL),
+  objective = NULL,
   cols_extra = NULL,
   f_trans = NULL
 )
 }
 \description{
-Make predictions for new data.
+Make predictions and compute SHAP values for new data.
 }
