@@ -10,12 +10,12 @@
            id = NULL,
            col_wt = NULL,
            wt = NULL,
+           cols_extra = NULL,
            drop = TRUE,
            objective = NULL,
            use_y = FALSE,
            is_prediction = !use_y) {
 
-    # browser()
     has_data <- !is.null(data)
     has_col_id <- !is.null(col_id)
     has_id <- !is.null(id)
@@ -24,6 +24,7 @@
     has_y <- !is.null(y)
     has_col_wt <- !is.null(col_wt)
     has_wt <- !is.null(wt)
+    has_cols_extra <- !is.null(cols_extra)
 
     if(!has_y & !has_col_y & use_y) {
       use_y <- FALSE
@@ -270,7 +271,7 @@
 
       type_y <- if(n_y == 2L) {
         'binary'
-      } else if (n_y < (length(y) * 0.5)) {
+      } else if (n_y > 1L & n_y < (length(y) * 0.5)) {
         .display_warning(
           'Make sure you\'ve defined `num_class` (since this looks like a multinomial problem).'
         )
@@ -288,25 +289,27 @@
         assertthat::assert_that(has_0, msg = '`y` should include a 0 class.')
       }
 
-      # objective_makes_sense <- if(type_y == 'binary') {
-      #   objective %>% str_detect('^binary[:]')
-      # } else if (type_y == 'multiclass') {
-      #   objective %>% str_detect('^multi[:]')
-      # } else if (type_y == 'continuous') {
-      #   objective %>% str_detect('^reg[:]')
-      # }
-      #
-      # assertthat::assert_that(objective_makes_sense, msg = glue::glue('It doesn\'t seem like your `objective` ({objective}) makes sense given the type of `y` ({type_y})))'))
     } else if(has_objective) {
-      type_y <- 'unknown'
+      type_y <- if(objective %>% str_detect('^binary[:]')) {
+        'binary'
+      } else if (objective %>% str_detect('^multi[:]')) {
+        'multiclass'
+      } else if (objective %>% str_detect('^reg[:]')) {
+        'continuous'
+      }
+
     } else {
       .display_error(
         'You should provide some hint of the class of `y` by either
         (1) providing `y` (or `col_y` and `data`) and setting `use_y`,
         (2) explicitly setting `objective`, or
-        (3) passing in a fit with non-NULL `fit$params$objective$`.'
+        (3) passing in a fit with non-NULL `fit$params$objective`.'
       )
       type_y <- 'unknown'
+    }
+
+    if(has_cols_extra) {
+      x <- x %>% dplyr::select(-dplyr::any_of(cols_extra))
     }
 
     list(

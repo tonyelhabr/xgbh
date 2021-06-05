@@ -146,24 +146,23 @@ do_predict <-
     type_y <- res_check$type_y
     rm('res_check')
 
-    if(has_cols_x) {
+    if(!has_cols_x) {
       nms_x <- colnames(x_mat)
       nms_diff1 <- setdiff(nms_x, cols_x)
       len_diff1 <- length(nms_diff1)
-      len_diff_gt1 <- ifelse(len_diff1 > 1L, TRUE, FALSE)
-      assertthat::assert_that(len_diff1 == 0L, msg = glue::glue('There {ifelse(len_diff_gt1, "are", "is")} {len_diff1} name{ifelse(len_diff_gt1, "s", "")} in  `x`/`data` that are not in `fit` .\nDifference{ifelse(len_diff_gt1, "s", "")}: {paste(nms_diff1, collapse = "`, `", sep = "")}'))
+      is_len_diff_gt1 <- ifelse(len_diff1 > 1L, TRUE, FALSE)
+      assertthat::assert_that(is_len_diff_gt1, msg = glue::glue('There {ifelse(len_diff_gt1, "are", "is")} {len_diff1} name{ifelse(len_diff_gt1, "s", "")} in  `x`/`data` that are not in `fit` .\nDifference{ifelse(len_diff_gt1, "s", "")}: {paste(nms_diff1, collapse = "`, `", sep = "")}'))
       # I think I should technically still do this, even with `x_mat` returned in `res_check`.
 
       nms_diff2 <- setdiff(cols_x, nms_x)
       len_diff2 <- length(nms_diff2)
-      len_diff_gt2 <- ifelse(len_diff2 > 1L, TRUE, FALSE)
-      assertthat::assert_that(len_diff2 == 0L, msg = glue::glue('There {ifelse(len_diff_gt2, "are", "is")} {len_diff1} name{ifelse(len_diff_gt2, "s", "")} in `fit` that are not in `x`/`data`.\nDifference{ifelse(len_diff_gt2, "s", "")}: {paste(nms_diff2, collapse = "`, `", sep = "")}'))
+      is_len_diff_gt2 <- ifelse(len_diff2 > 1L, TRUE, FALSE)
+      assertthat::assert_that(is_len_diff_gt2, msg = glue::glue('There {ifelse(len_diff_gt2, "are", "is")} {len_diff1} name{ifelse(len_diff_gt2, "s", "")} in `fit` that are not in `x`/`data`.\nDifference{ifelse(len_diff_gt2, "s", "")}: {paste(nms_diff2, collapse = "`, `", sep = "")}'))
       # x_mat <- x %>% dplyr::select(dplyr::all_of(cols_x)) %>% .df2mat()
     }
 
-
     .f_predict <- function() {
-
+      # browser()
       if(type_y == 'multiclass') {
         preds_v <- fit %>% stats::predict(x_mat, ...)
         n_class <- fit$params$num_class

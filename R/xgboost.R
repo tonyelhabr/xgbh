@@ -36,6 +36,7 @@
   dplyr::bind_rows(res)
 }
 
+#' @importFrom purrr compact
 #' @noRd
 .tune_xgb_cv <-
   function(grid_params,
@@ -43,6 +44,7 @@
            booster,
            objective,
            eval_metrics,
+           .params,
            ...) {
 
     .get_metrics <- function(params, idx = 1) {
@@ -54,14 +56,14 @@
           booster = booster,
           objective = objective,
           eval_metric = eval_metrics,
-          eta = params$learn_rate,
-          gamma = params$loss_reduction,
-          subsample = params$sample_size,
-          colsample_bytree = params$mtry,
-          max_depth = params$tree_depth,
-          min_child_weight = params$min_n
+          eta = .params$eta %||% params$learn_rate,
+          gamma = .params$gamma %||% params$loss_reduction,
+          subsample = .params$subsample %||% params$sample_size,
+          colsample_bytree = .params$colsample_bytree %||% params$mtry,
+          max_depth = .params$max_depth %||% params$tree_depth,
+          min_child_weight = .params$min_child_weight %||% params$min_n
         )
-
+      # res <- purrr::compact(c(res, .params))
 
       fit_cv <-
         xgboost::xgb.cv(

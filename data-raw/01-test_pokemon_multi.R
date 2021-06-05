@@ -39,8 +39,6 @@ jui_tst_xgb <- df_tst %>% .to_xgb()
 jui_tst_xgb
 
 set.seed(42)
-
-load_all()
 col_y_sym <- sym(col_y)
 n_class <- jui_trn %>% distinct(!!col_y_sym) %>% pull(!!col_y_sym) %>% length()
 do_fit_partially <- partial(
@@ -57,7 +55,9 @@ do_fit_partially <- partial(
 
 do_fit_robustly <- partial(
   do_fit_partially,
-  grid_params = jui_trn_xgb %>% select(-any_of(c(col_y, col_id))) %>% generate_grid_params(n_param = 50),
+  grid_params = jui_trn_xgb %>%
+    select(-any_of(c(col_y, col_id))) %>%
+    generate_grid_params(n_param = 50),
   # n_param = 50,
   nrounds = 1000,
   suffix = 'pokemon_robust',
@@ -71,7 +71,7 @@ c(tune, fit) %<-%
   )
 fit
 
-load_all(); do_predict_partially <- partial(
+do_predict_partially <- partial(
   do_predict,
   overwrite = FALSE,
   fit = fit,

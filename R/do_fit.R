@@ -66,12 +66,15 @@ do_fit <-
            col_strata = NULL,
            wt = NULL,
            col_wt = NULL,
+           cols_extra = NULL,
            grid_params = NULL,
            n_param = 10,
            nrounds = 2000,
            booster = 'gbtree',
            objective = 'reg:squarederror',
            eval_metrics = list('rmse'),
+           .params_tune = list(NULL),
+           .params = list(NULL),
            f_slice = dplyr::slice_min,
            early_stopping_rounds = 10) {
 
@@ -106,7 +109,6 @@ do_fit <-
     has_data <- !is.null(data)
     has_col_wt <- !is.null(col_wt)
     has_wt <- !is.null(wt)
-
     res_check <-
       .do_check(
         use_y = TRUE,
@@ -120,6 +122,7 @@ do_fit <-
         col_id = col_id,
         wt = wt,
         col_wt = col_wt,
+        cols_extra = cols_extra,
         drop = drop
       )
     data <- res_check$data
@@ -165,7 +168,6 @@ do_fit <-
             assertthat::assert_that(is.character(col_strata), msg = glue::glue('`col_strata` must be a character, not a {class(col_strata)}.'))
             assertthat::assert_that(length(col_strata) == 1L, msg = '`col_strata` must have length 1, not {length(col_strata)}.')
             assertthat::assert_that(any(col_strata == nms), msg = glue::glue('`col_strata = {col_strata} is not in `names(data)`.'))
-            col_strata_sym <- col_strata %>% sym()
             strata <- data[[col_strata]]
           } else {
             strata_is_df <- any(class(strata) == 'data.frame')
@@ -200,11 +202,7 @@ do_fit <-
             split(.$fold) %>%
             purrr::map(~dplyr::select(.x, id) %>% dplyr::pull(id))
 
-          fold_ids <-
-            .create_folds(
-              strata,
-              k = n_fold
-            )
+          fold_ids <- create_folds(strata, k = n_fold)
 
         } else {
           # col_strata <- col_y
@@ -248,6 +246,7 @@ do_fit <-
           sample_weight = wt,
           early_stopping_rounds = early_stopping_rounds,
           print_every_n = print_every_n,
+          .params = .params_tune,
           ...
         )
       }
@@ -285,12 +284,12 @@ do_fit <-
           booster = booster,
           objective = objective,
           eval_metric = eval_metrics,
-          eta = .pluck_param('eta'),
-          gamma = .pluck_param('gamma'),
-          subsample = .pluck_param('subsample'),
-          colsample_bytree = .pluck_param('colsample_bytree'),
-          max_depth = .pluck_param('max_depth'),
-          min_child_weight = .pluck_param('min_child_weight')
+          eta = .params$eta %||% .pluck_param('eta'),
+          gamma = .params$gamma %||% .pluck_param('gamma'),
+          subsample = .params$subsample %||% .pluck_param('subsample'),
+          colsample_bytree = .params$colsample_bytree %||% .pluck_param('colsample_bytree'),
+          max_depth = .params$max_depth %||% .pluck_param('max_depth'),
+          min_child_weight = .params$min_child_weight %||% .pluck_param('min_child_weight')
         )
       params_best
 

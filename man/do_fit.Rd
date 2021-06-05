@@ -42,12 +42,14 @@ do_fit(
   col_strata = NULL,
   wt = NULL,
   col_wt = NULL,
+  cols_extra = NULL,
   grid_params = NULL,
   n_param = 10,
   nrounds = 2000,
   booster = "gbtree",
   objective = "reg:squarederror",
   eval_metrics = list("rmse"),
+  .params = list(NULL),
   f_slice = dplyr::slice_min,
   early_stopping_rounds = 10
 )

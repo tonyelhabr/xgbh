@@ -13,9 +13,9 @@ rm('nms')
 col_y <- 'match'
 col_id <- 'idx'
 
-x <- df_trn %>% select(-any_of(c(col_y, col_id)))
-y <- df_trn %>% select(all_of(col_y))
-id <- df_trn %>% select(all_of(col_id))
+x_trn <- df_trn %>% select(-any_of(c(col_y, col_id)))
+y_trn <- df_trn %>% select(all_of(col_y))
+id_trn <- df_trn %>% select(all_of(col_id))
 n_row <- 10
 set.seed(42)
 
@@ -48,15 +48,15 @@ fit
 idx <- 1:n_row
 c(tune, fit) %<-%
   do_fit_quickly_timely(
-    x = x[idx, ],
-    y = y[idx, ],
-    id = id[idx, ]
+    x = x_trn[idx, ],
+    y = y_trn[idx, ],
+    id = id_trn[idx, ]
   )
 fit
 
 do_fit_robustly <- partial(
   do_fit_partially,
-  grid_params = x %>% generate_grid_params(n_param = 30),
+  grid_params = x_trn %>% generate_grid_params(n_param = 30),
   nrounds = 2000,
   suffix = 'speed_dating_robust',
   ... =
