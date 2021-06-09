@@ -21,7 +21,7 @@ rec_init <-
   recipe(form, data = .) %>%
   update_role(c(number), new_role = 'id') %>%
   step_rm(any_of(c('type_2', 'total'))) %>%
-  step_dummy(generation) %>%
+  # step_dummy(generation) %>%
   step_nzv(all_numeric_predictors())
 rec_init
 
@@ -53,14 +53,16 @@ do_fit_partially <- partial(
   ... =
 )
 
+suffix <- 'pokemon_nodummy_robust'
 do_fit_robustly <- partial(
   do_fit_partially,
-  grid_params = jui_trn_xgb %>%
+  grid_params =
+    jui_trn_xgb %>%
     select(-any_of(c(col_y, col_id))) %>%
-    generate_grid_params(n_param = 50),
+    generate_grid_params(n_param = 40),
   # n_param = 50,
   nrounds = 1000,
-  suffix = 'pokemon_robust',
+  suffix = suffix,
   ... =
 )
 do_fit_robustly_timely <- time_it(do_fit_robustly)
@@ -71,9 +73,20 @@ c(tune, fit) %<-%
   )
 fit
 
+# library(tidyverse)
+n_round <- fit$best_iteration
+n_class <- fit$params$num_class
+imp <- xgboost::xgb.importance(model = fit)
+imp1 <- xgboost::xgb.importance(model = fit, trees = seq(from = 0, by = n_class, length.out = n_round))
+xgboost::xgb.ggplot.importance(imp) +
+  tonythemes::theme_tony()
+xgboost::xgb.ggplot.importance(imp1) +
+  tonythemes::theme_tony()
+
 do_predict_partially <- partial(
   do_predict,
-  overwrite = FALSE,
+  # overwrite = FALSE,
+  overwrite = TRUE,
   fit = fit,
   use_y = TRUE,
   col_y = col_y,
@@ -85,14 +98,14 @@ do_predict_timely <- time_it(do_predict_partially)
 c(probs_trn, shap_trn) %<-%
   do_predict_timely(
     data = jui_trn_xgb,
-    suffix = 'pokemon_trn'
+    suffix = sprintf('%s_trn', suffix)
   )
 probs_trn
 
 c(probs_tst, shap_tst) %<-%
   do_predict_timely(
     data = jui_tst_xgb,
-    suffix = 'pokemon_tst'
+    suffix = sprintf('%s_tst', suffix)
   )
 probs_tst
 
@@ -105,3 +118,11 @@ do_eval <- function(probs) {
 
 probs_trn %>% do_eval()
 probs_tst %>% do_eval()
+
+do_plot_shap(
+  shap = shap_trn,
+  suffix = sprintf('%s_trn', suffix),
+  overwrite = TRUE,
+  col_y = col_y,
+  col_id = col_id
+)

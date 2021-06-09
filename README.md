@@ -21,3 +21,5 @@ You can install the development version of `{xgbh}` from
 # install.packages('remotes')
 remotes::install_github('tonyelhabr/xgbh')
 ```
+
+THIS PROBABLY WON’T WORK FOR YOU (YET)

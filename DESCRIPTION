@@ -19,7 +19,9 @@ Imports:
     rlang (>= 0.1.2),
     xgboost,
     zeallot,
-    splitTools
+    splitTools,
+    ggplot2,
+    ggbeeswarm
 Suggests: 
     roxygen2
 Encoding: UTF-8

@@ -129,12 +129,13 @@ do_predict <-
         use_y = use_y,
         is_prediction = TRUE,
         objective = objective,
-        data = data, # [, c(col_y, col_id, cols_x)],
+        data = data,
         x = x,
         y = y,
         col_y = col_y,
         id = id,
-        col_id = col_id
+        col_id = col_id,
+        cols_extra = cols_extra
       )
     data <- res_check$data
     x <- res_check$x
@@ -142,6 +143,7 @@ do_predict <-
     col_y <- res_check$col_y
     id <- res_check$id
     col_id <- res_check$col_id
+    cols_extra <- res_check$cols_extra
     x_mat <- res_check$x_mat
     type_y <- res_check$type_y
     rm('res_check')
@@ -162,7 +164,6 @@ do_predict <-
     }
 
     .f_predict <- function() {
-      # browser()
       if(type_y == 'multiclass') {
         preds_v <- fit %>% stats::predict(x_mat, ...)
         n_class <- fit$params$num_class
@@ -170,7 +171,7 @@ do_predict <-
           matrix(preds_v, ncol = n_class, byrow = TRUE) %>%
           as.data.frame() %>%
           as_tibble() %>%
-          set_names(sprintf('.prob_%d', 1:n_class))
+          set_names(sprintf('.prob_%d', 0:(n_class - 1)))
       } else if (isTRUE(objective == 'binary:logistic')) {
         preds_v <- fit %>% stats::predict(x_mat, ...)
         preds <- tibble::tibble(.prob = preds_v)
@@ -217,7 +218,7 @@ do_predict <-
 
       # These columns will be added twice if `augment = TRUE`
       has_cols_extra <- !is.null(cols_extra)
-      if(has_cols_extra & !augment) {
+      if(has_cols_extra & augment) {
         preds <-
           preds %>%
           dplyr::bind_cols(

@@ -49,6 +49,7 @@ do_fit(
   booster = "gbtree",
   objective = "reg:squarederror",
   eval_metrics = list("rmse"),
+  .params_tune = list(NULL),
   .params = list(NULL),
   f_slice = dplyr::slice_min,
   early_stopping_rounds = 10

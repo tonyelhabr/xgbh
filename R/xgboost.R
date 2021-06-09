@@ -32,7 +32,6 @@
   res[[col_trn_res]] = fit_cv$evaluation_log[res$iter, ][[col_trn]]
   res[[col_tst_res]] = fit_cv$evaluation_log[res$iter, ][[col_tst]]
   res[['eval_metric']] <- NULL
-  # browser()
   dplyr::bind_rows(res)
 }
 
@@ -40,6 +39,8 @@
 #' @noRd
 .tune_xgb_cv <-
   function(grid_params,
+           path,
+           f_export,
            x_dmat,
            booster,
            objective,
@@ -63,7 +64,7 @@
           max_depth = .params$max_depth %||% params$tree_depth,
           min_child_weight = .params$min_child_weight %||% params$min_n
         )
-      # res <- purrr::compact(c(res, .params))
+      res <- purrr::compact(c(res, .params))
 
       fit_cv <-
         xgboost::xgb.cv(
@@ -74,6 +75,9 @@
         )
 
       res <- .postprocess_xgb_cv_res(res, fit_cv, eval_metrics)
+      ext <- tools::file_ext(path)
+      path_res <- stringr::str_replace(path, sprintf('.%s', ext), sprintf('_%02d.%s', idx, ext))
+      f_export(res, path_res)
       res
     }
 

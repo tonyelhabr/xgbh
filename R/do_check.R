@@ -323,6 +323,7 @@
       col_id = col_id %||% '.id',
       wt = wt,
       col_wt = col_wt %||% '.wt',
+      cols_extra = cols_extra,
       x_mat = x %>% .df2mat()
     )
   }

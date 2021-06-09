@@ -90,8 +90,7 @@ c(tune, fit) %<-%
   )
 fit
 
-do_predict_timely <- time_it(xgbh::do_predict);
-c(preds_trn, shap_trn) %<-%
+do_predict_timely <- time_it(xgbh::do_predict); c(preds_trn, shap_trn) %<-%
   do_predict_timely(
     data = jui_trn,
     suffix = suffix,
@@ -125,15 +124,13 @@ preds_tst_export <-
 path_export <- here::here('inst/extdata/preds_s01e01_upload_v3.csv')
 preds_tst_export %>% write_csv(path_export)
 
-shell(
-  glue::glue('kaggle competitions submit -f {path_export} -m "tony trying hard 3" sliced-s01e01')
-)
-
-shell(
-  'kaggle competitions leaderboard sliced-s01e01 -s'
-)
-
-
+# shell(
+#   glue::glue('kaggle competitions submit -f {path_export} -m "tony trying hard 3" sliced-s01e01')
+# )
+#
+# shell(
+#   'kaggle competitions leaderboard sliced-s01e01 -s'
+# )
 
 c(preds_tst, shap_tst) %<-%
   do_predict_timely(

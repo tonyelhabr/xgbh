@@ -136,6 +136,7 @@ do_fit <-
     x_mat <- res_check$x_mat
     rm('res_check')
 
+    # TODO: Could simplify this by using the `info` parameter (takes a list, including `weight` and `label`)
     if(has_col_wt | has_wt) {
 
       x_dmat <-
@@ -145,7 +146,7 @@ do_fit <-
           label = y
         )
     } else {
-      # browser()
+
       x_dmat <-
         xgboost::xgb.DMatrix(
           x_mat,
@@ -155,7 +156,7 @@ do_fit <-
 
     .f_tune <- function() {
       set.seed(seed)
-      # browser()
+
       has_folds <- !is.null(fold_ids)
       has_col_strata <- !is.null(col_strata)
       has_strata <- !is.null(strata)
@@ -237,6 +238,8 @@ do_fit <-
 
       .tune_xgb_cv_partially <- function(...) {
         .tune_xgb_cv(
+          path = path_tune,
+          f_export = .f_export$tune,
           nrounds = nrounds,
           grid_params = grid_params,
           x_dmat = x_dmat,
@@ -291,9 +294,11 @@ do_fit <-
           max_depth = .params$max_depth %||% .pluck_param('max_depth'),
           min_child_weight = .params$min_child_weight %||% .pluck_param('min_child_weight')
         )
-      params_best
+      params_best <- purrr::compact(c(params_best, .params))
 
-      nrounds_best <- round((.pluck_param('iter') / ((n_fold - 1) / (n_fold))), 0) + early_stopping_rounds
+      # Don't remember where I got this calc from.
+      # nrounds_best <- round((.pluck_param('iter') / ((n_fold - 1) / (n_fold))), 0) + early_stopping_rounds
+      nrounds_best <- .pluck_param('iter') + early_stopping_rounds
 
       fit <-
         xgboost::xgboost(
@@ -304,7 +309,6 @@ do_fit <-
           nrounds = nrounds_best,
           early_stopping_rounds = early_stopping_rounds,
           print_every_n = print_every_n,
-          # verbose = verbose,
           ...
         )
     }

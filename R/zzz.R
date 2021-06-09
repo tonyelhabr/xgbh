@@ -3,7 +3,7 @@
 .onLoad <- function(libname, pkgname) {
   op <- options()
   op.xgbh <- list(
-    xgbh.dir_data = file.path('inst', 'extdata'),
+    xgbh.dir_data = 'data-test',
     engagement.seed = 42L,
     xgbh.verbose = TRUE
   )

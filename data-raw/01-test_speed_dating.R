@@ -21,18 +21,19 @@ set.seed(42)
 
 do_fit_partially <- partial(
   xgbh::do_fit,
-  overwrite = FALSE,
+  overwrite = TRUE,
   objective = 'binary:logistic',
   eval_metrics = list('logloss'),
-  # eval_metrics = list('error'),
   col_y = col_y,
   col_id = col_id,
   ... =
 )
 
+set.seed(42)
+grid_params <- x_trn %>% generate_grid_params(n_param = 10)
 do_fit_quickly <- partial(
   do_fit_partially,
-  grid_params = x %>% generate_grid_params() %>% slice(1),
+  grid_params = grid_params %>% slice(1),
   nrounds = 10,
   suffix = 'speed_dating_quick',
   ... =
@@ -54,9 +55,10 @@ c(tune, fit) %<-%
   )
 fit
 
+
 do_fit_robustly <- partial(
   do_fit_partially,
-  grid_params = x_trn %>% generate_grid_params(n_param = 30),
+  grid_params = grid_params,
   nrounds = 2000,
   suffix = 'speed_dating_robust',
   ... =
@@ -71,9 +73,8 @@ fit
 
 do_predict_partially <- partial(
   do_predict,
-  overwrite = FALSE,
+  overwrite = TRUE,
   fit = fit,
-  # objective = 'binary:logistic',
   col_y = col_y,
   col_id = col_id,
   ... =
@@ -84,7 +85,6 @@ c(probs_trn, shap_trn) %<-%
   do_predict_timely(
     data = df_trn,
     use_y = TRUE,
-    # col_y = col_y,
     suffix = 'speed_dating_trn'
   )
 probs_trn
@@ -105,3 +105,11 @@ do_eval <- function(probs) {
 }
 
 probs_trn %>% do_eval()
+
+do_plot_shap(
+  shap = shap_trn,
+  suffix = 'speed_dating_trn',
+  overwrite = TRUE,
+  col_y = col_y,
+  col_id = col_id
+)
